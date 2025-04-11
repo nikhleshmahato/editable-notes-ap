@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Editable Notes Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    #main {
+      padding: 40px;
+    }
+
+    .buttons button {
+      margin: 10px;
+      padding: 12px 25px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #viewer {
+      display: none;
+      padding: 20px;
+    }
+
+    #backBtn, #saveBtn {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    #fileContent {
+      width: 80%;
+      height: 400px;
+      margin-top: 20px;
+      padding: 15px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="main">
+    <h1>Select a Subject to Edit</h1>
+    <div class="buttons">
+      <button onclick="loadFile('subject1.txt')">Subject 1</button>
+      <button onclick="loadFile('subject2.txt')">Subject 2</button>
+      <button onclick="loadFile('subject3.txt')">Subject 3</button>
+      <button onclick="loadFile('subject4.txt')">Subject 4</button>
+      <button onclick="loadFile('subject5.txt')">Subject 5</button>
+    </div>
+  </div>
+
+  <div id="viewer">
+    <button id="backBtn" onclick="goBack()">← Back</button>
+    <button id="saveBtn" onclick="saveFile()">💾 Save</button>
+    <textarea id="fileContent"></textarea>
+  </div>
+
+  <script>
+    let currentFile = '';
+
+    function loadFile(filename) {
+      currentFile = filename;
+      fetch(filename)
+        .then(response => response.text())
+        .then(data => {
+          document.getElementById("main").style.display = "none";
+          document.getElementById("viewer").style.display = "block";
+          document.getElementById("fileContent").value = data;
+        })
+        .catch(err => {
+          document.getElementById("fileContent").value = "Error loading file.";
+        });
+    }
+
+    function goBack() {
+      document.getElementById("viewer").style.display = "none";
+      document.getElementById("fileContent").value = "";
+      document.getElementById("main").style.display = "block";
+    }
+
+    function saveFile() {
+      fetch('/save', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          filename: currentFile,
+          content: document.getElementById("fileContent").value
+        })
+      })
+      .then(response => response.text())
+      .then(msg => alert(msg))
+      .catch(err => alert("Error saving file."));
+    }
+  </script>
+
+</body>
+</html>
